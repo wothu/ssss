@@ -1,0 +1,13 @@
+html/js/css file
+img file
+exe/other binary file
+chinese file name / path name
+files in folders
+404
+location with query and hash
+location begin with //
+response route config
+port/host config
+default index config
+index.html / index.htm
+../ to the outer folder will return 403
