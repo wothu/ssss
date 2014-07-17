@@ -68,14 +68,14 @@ var getRouteSync = function(routeFile){
     return route;
 };
 
-var readFile = function(path, callback){
-    fs.readFile(path, function(err, data){
+var readFile = function(pathname, callback){
+    fs.readFile(pathname, function(err, data){
         var type;
         if (err) {
             callback(1);
         }
         else {
-            fs.lstat(path, function(err, stat){
+            fs.lstat(pathname, function(err, stat){
                 if (err) {
                     callback(1);
                 }
@@ -94,24 +94,24 @@ var readFile = function(path, callback){
 };
 
 var runServer = function(config){
-    var resolvePath = function(path){
-        if (config.route[path]) {
-            return config.route[path];
+    var resolvePath = function(pathname){
+        var ret = '';
+        if (config.route[pathname]) {
+            ret = config.route[pathname];
         }
-        if (path === '/') {
-            return config.index ? './' + config.index : '';
+        else if (pathname === '/') {
+            ret = config.index ? './' + config.index : '';
+        } 
+        else if (pathname.charAt(0) === '/') {
+            ret = '.' + pathname;
         }
-        if (path.charAt(0) === '/') {
-            return '.' + path;
-        }
-        return path;
+        return path.normalize(ret);
     };
 
     var server = http.createServer(function(req, res){
         var pathname = url.parse(req.url, true).pathname;
         console.log('Path: ' + pathname);
         pathname = resolvePath(decodeURIComponent(pathname));
-        pathname = path.normalize(pathname);
         if (pathname.indexOf('..') >= 0) {
             res.writeHead(403);
             res.end('The resource you required is not accessible.');
