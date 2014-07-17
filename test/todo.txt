@@ -1,13 +1,12 @@
-html/js/css file
-img file
-exe/other binary file
-chinese file name / path name
-files in folders
-404
-location with query and hash
-location begin with //
-response route config
-port/host config
-default index config
-index.html / index.htm
-../ to the outer folder will return 403
+[ok] html/js/css file 
+[ok] img file
+[ok] chinese file name / path name
+[ok] files in folders
+[ok] 404
+     location with query and hash
+     response route config
+     port/host config
+     default index config
+     index.html / index.htm
+[ok] ../ to the outer folder will return 403
+     content type while response route is enabled (should return the real files type?)

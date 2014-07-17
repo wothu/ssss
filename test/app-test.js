@@ -87,7 +87,7 @@ var load = function(options, data, callback){
 
 
 describe('run server @ localhost:8888', function(){
-    this.timeout(60000);
+    this.timeout(30000);
     var server;
     var address = function(path){
         return {
@@ -101,19 +101,101 @@ describe('run server @ localhost:8888', function(){
             done();
         });
     });
-    describe('use http request to access resources', function(){
+    describe('path and filename test', function(){
         it('should return default index.html when the file name is omitted', function(done){
             load(address(''), function(res){
                 res.status.should.be.exactly(200);
                 res.data.length.should.be.above(0);
-                res.['content-type'].should.be.exactly('text/html');
                 done();
             });
         });
         it('should return correct file when the filename is given', function(done){
-            load(address('a.css'), function(res){})
+            load(address('/index.html'), function(res){
+                res.status.should.be.exactly(200);
+                res.data.length.should.be.above(0);
+                done();
+            })
+        });
+        it('should return correct file when the file is in a sub directory', function(done){
+            load(address('/css/libs/a.css'), function(res){
+                res.status.should.be.exactly(200);
+                res.data.length.should.be.above(0);
+                done();
+            });
+        });
+        it('should return correct file when the path contains ".."', function(done){
+            load(address('/css/../test.jpg'), function(res){
+                res.status.should.be.exactly(200);
+                res.data.length.should.be.above(0);
+                done();
+            })
+        });
+        it('should return correct file when it is binary', function(done){
+            load(address('/test.jpg'), function(res){
+                res.status.should.be.exactly(200);
+                res.data.length.should.be.above(0);
+                done();
+            })
+        });
+        it('should return correct file when path contains non-ascii charactors', function(done){
+            load(address('/测试/测试.txt'), function(res){
+                res.status.should.be.exactly(200);
+                res.data.length.should.be.above(0);
+                done();
+            })
         });
     });
+
+    describe('content type test', function(){
+        it('should return correct content-type for html', function(done){
+            load(address('/index.html'), function(res){
+                res.headers['content-type'].should.be.exactly('text/html');
+                done();
+            });
+        });
+        it('should return correct content-type for js', function(done){
+            load(address('/js/a.js'), function(res){
+                res.headers['content-type'].should.be.exactly('application/javascript');
+                done();
+            });
+        });
+        it('should return correct content-type for css', function(done){
+            load(address('/css/libs/a.css'), function(res){
+                res.headers['content-type'].should.be.exactly('text/css');
+                done();
+            });
+        });
+        it('should return correct content-type for json', function(done){
+            load(address('/test.json'), function(res){
+                res.headers['content-type'].should.be.exactly('application/json');
+                done();
+            });
+        });
+        it('should return correct content-type for img', function(done){
+            load(address('/test.jpg'), function(res){
+                res.headers['content-type'].should.be.exactly('image/jpeg');
+                done();
+            });
+        });
+    });
+
+    describe('status code test', function(){
+        it('should return 403 when the file is out of the root directory', function(done){
+            load(address('/../test.html'), function(res){
+                res.status.should.be.exactly(403);
+                done();
+            })
+        });
+        it('should return 404 when the file doesn\'t exist', function(done){
+            load(address('/asdf.html'), function(res){
+                res.status.should.be.exactly(404);
+                done();
+            })
+        });
+    });
+
+
+
     after(function(){
         server.kill();
     });
@@ -127,7 +209,7 @@ describe('run server @ localhost:8888', function(){
 
 
 describe.skip('run server @ localhost:8888', function(){
-    this.timeout(60000);
+    this.timeout(30000);
 
     var har, traffic;
     before(function(done){
