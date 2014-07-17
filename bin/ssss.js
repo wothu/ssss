@@ -5,6 +5,7 @@
 
 var http     = require('http'),
     fs       = require('fs'),
+    path     = require('path'),
     url      = require('url'),
     mime     = require('mime'),
     isBinary = require('isbinaryfile');
@@ -107,13 +108,18 @@ var runServer = function(config){
     };
 
     var server = http.createServer(function(req, res){
-        var path = url.parse(req.url, true).pathname;
-        console.log('Path: ' + path);
-        path = resolvePath(decodeURIComponent(path));
-        readFile(path, function(err, data, type){
+        var pathname = url.parse(req.url, true).pathname;
+        console.log('Path: ' + pathname);
+        pathname = resolvePath(decodeURIComponent(pathname));
+        pathname = path.normalize(pathname);
+        if (pathname.indexOf('..') >= 0) {
+            res.writeHead(403);
+            res.end('The resource you required is not accessible.');
+        }
+        readFile(pathname, function(err, data, type){
             if (!err) {
                 res.writeHead(200, {
-                    'Content-Type' : mime.lookup(path)
+                    'Content-Type' : mime.lookup(pathname)
                 });
                 if (type === 'binary') {
                     res.end(data, 'binary');
