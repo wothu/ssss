@@ -97,7 +97,7 @@ var runServer = function(config){
     var resolvePath = function(pathname, search){
         var ret = '';
         var routed = false;
-        if (config.route[pathname + search]) {
+        if (search && config.route[pathname + search]) {
             ret = config.route[pathname + search];
             routed = true;
         }
@@ -122,7 +122,7 @@ var runServer = function(config){
         var resolvedResult;
 
         console.log('REQUEST URL: ', req.url);
-        resolvedResult = resolvePath(decodeURIComponent(pathname, searchStr));
+        resolvedResult = resolvePath(decodeURIComponent(pathname), decodeURIComponent(searchStr));
         pathname = resolvedResult[0];
         routed = resolvedResult[1];
         console.log('RESOLVED TO: ', pathname, '\n');

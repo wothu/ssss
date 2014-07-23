@@ -188,13 +188,13 @@ describe.skip('run server @ localhost:8888', function(){
             load(address('/../test.html'), function(res){
                 res.status.should.be.exactly(403);
                 done();
-            })
+            });
         });
         it('should return 404 when the file doesn\'t exist', function(done){
             load(address('/asdf.html'), function(res){
                 res.status.should.be.exactly(404);
                 done();
-            })
+            });
         });
     });
 
@@ -229,7 +229,48 @@ describe('run server @ localhost:8888 with route file', function(){
 
     describe('basic test', function(){
         it('should return correct file when path is specified in the route file', function(done){
+            load(address('/virtual0'), function(res){
+                res.status.should.be.exactly(200);
+                res.data.length.should.be.above(0);
+                res.headers['content-type'].should.be.exactly('text/css');
+                done();
+            });
+        });
+        it('should return correct file when specified path is out of root directory', function(done){
             load(address('/virtual1'), function(res){
+                res.status.should.be.exactly(200);
+                res.data.length.should.be.above(0);
+                done();
+            });
+        });
+        it('should return 404 when the path specified in the route file does not exist', function(done){
+            load(address('/virtual2'), function(res){
+                res.status.should.be.exactly(404);
+                done();
+            });
+        });
+        it('should return correct file as normal when path is not defined in route file', function(done){
+            load(address('/css/libs/a.css'), function(res){
+                res.status.should.be.exactly(200);
+                res.data.length.should.be.above(0);
+                done();
+            });
+        });
+        it('should return correct file when search string is specified in the route file', function(done){
+            load(address('/virtual3?foo=1&bar=2'), function(res){
+                res.status.should.be.exactly(200);
+                res.data.length.should.be.above(0);
+                done();
+            });
+        });
+        it('should return 404 when search string is specified in the route file and no related file', function(done){
+            load(address('/virtual3?foo=1&bar=2&baz=3'), function(res){
+                res.status.should.be.exactly(404);
+                done();
+            });
+        });
+        it('should return correct file when search string exist in request but not in route file', function(done){
+            load(address('/virtual4?foo=1&bar=2'), function(res){
                 res.status.should.be.exactly(200);
                 res.data.length.should.be.above(0);
                 done();

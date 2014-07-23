@@ -1,3 +1,7 @@
 {
-  "/virtual1": "../test.html"
+  "/virtual0": "css/libs/a.css",
+  "/virtual1": "../test.html",
+  "/virtual2": "../test2.html",
+  "/virtual3?foo=1&bar=2": "test.json",
+  "/virtual4": "test.jpg"
 }
