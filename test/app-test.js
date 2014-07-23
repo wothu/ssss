@@ -276,6 +276,20 @@ describe('run server @ localhost:8888 with route file', function(){
                 done();
             });
         });
+        it('should return actual content type when the ext name has been redirected', function(done){
+            load(address('/test.jpg?foo=1'), function(res){
+                res.status.should.be.exactly(200);
+                res.headers['content-type'].should.be.exactly('application/json');
+                done();
+            });
+        });
+        it('should return correct file when the file is in route but search string does not match', function(done){
+            load(address('/test.jpg'), function(res){
+                res.status.should.be.exactly(200);
+                res.headers['content-type'].should.be.exactly('image/jpeg');
+                done();
+            });
+        });
     });
 
     after(function(){

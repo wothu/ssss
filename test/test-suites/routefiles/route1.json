@@ -3,5 +3,6 @@
   "/virtual1": "../test.html",
   "/virtual2": "../test2.html",
   "/virtual3?foo=1&bar=2": "test.json",
-  "/virtual4": "test.jpg"
+  "/virtual4": "test.jpg",
+  "/test.jpg?foo=1" : "test.json"
 }
