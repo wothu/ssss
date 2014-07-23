@@ -129,7 +129,7 @@ var runServer = function(config){
 
         if (pathname.indexOf('..') >= 0 && !routed) {
             res.writeHead(403);
-            res.end('The resource you required is not accessible.');
+            res.end();
         }
         readFile(pathname, function(err, data, type){
             if (!err) {
@@ -146,7 +146,7 @@ var runServer = function(config){
             }
             else {
                 res.writeHead(404);
-                res.end('The resource you required doesn\'t exist.');
+                res.end();
             }
         });
     });
