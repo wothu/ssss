@@ -14,8 +14,12 @@ var appPath      = path.resolve('../bin/ssss.js'),
     phantomPath  = phantom.path,
     phantomAgent = path.resolve('./netsniff.js');
 
-var startServer = function(folder, address, callback){
-    var serverProcess = cp.fork(appPath, [address], {cwd: folder});
+var startServer = function(folder, address, routeFile, callback){
+    if (typeof routeFile === 'function') {
+        callback = routeFile;
+        routeFile = '';
+    }
+    var serverProcess = cp.fork(appPath, [address, routeFile], {cwd: folder});
     serverProcess.on('message', function(msg){
         if (msg === 'Server started') {
             callback();
@@ -86,7 +90,7 @@ var load = function(options, data, callback){
 };
 
 
-describe('run server @ localhost:8888', function(){
+describe.skip('run server @ localhost:8888', function(){
     this.timeout(30000);
     var server;
     var address = function(path){
@@ -201,7 +205,42 @@ describe('run server @ localhost:8888', function(){
 
 
 
+describe('run server @ localhost:8888 with route file', function(){
+    this.timeout(30000);
+    var server;
+    var address = function(path){
+        return {
+            hostname: 'localhost',
+            port: 8888,
+            path: path
+        }
+    };
+    before(function(done){
+        server = startServer(
+            path.join(testPath, '1'),
+            'localhost:8888',
+            path.join(testPath, 'routefiles', 'route1.json'),
+            function()
+            {
+                done();
+            }
+        );
+    });
 
+    describe('basic test', function(){
+        it('should return correct file when path is specified in the route file', function(done){
+            load(address('/virtual1'), function(res){
+                res.status.should.be.exactly(200);
+                res.data.length.should.be.above(0);
+                done();
+            });
+        });
+    });
+
+    after(function(){
+        server.kill();
+    });
+});
 
 
 

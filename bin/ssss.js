@@ -62,7 +62,7 @@ var getRouteSync = function(routeFile){
             route = JSON.parse(fs.readFileSync(routeFile));
         }
         catch (e) {
-            console.log('Route file does not exist, or format is incorrect.');
+            console.warn('Route file does not exist, or format is incorrect (should be JSON).');
         }
     }
     return route;
@@ -94,10 +94,16 @@ var readFile = function(pathname, callback){
 };
 
 var runServer = function(config){
-    var resolvePath = function(pathname){
+    var resolvePath = function(pathname, search){
         var ret = '';
-        if (config.route[pathname]) {
+        var routed = false;
+        if (config.route[pathname + search]) {
+            ret = config.route[pathname + search];
+            routed = true;
+        }
+        else if (config.route[pathname]) {
             ret = config.route[pathname];
+            routed = true;
         }
         else if (pathname === '/') {
             ret = config.index ? './' + config.index : '';
@@ -105,14 +111,23 @@ var runServer = function(config){
         else if (pathname.charAt(0) === '/') {
             ret = '.' + pathname;
         }
-        return path.normalize(ret);
+        return [path.normalize(ret), routed];
     };
 
     var server = http.createServer(function(req, res){
-        var pathname = url.parse(req.url, true).pathname;
-        console.log('Path: ' + pathname);
-        pathname = resolvePath(decodeURIComponent(pathname));
-        if (pathname.indexOf('..') >= 0) {
+        var parsedUrl = url.parse(req.url, true);
+        var pathname  = parsedUrl.pathname;
+        var searchStr = parsedUrl.search;
+        var routed;
+        var resolvedResult;
+
+        console.log('REQUEST URL: ', req.url);
+        resolvedResult = resolvePath(decodeURIComponent(pathname, searchStr));
+        pathname = resolvedResult[0];
+        routed = resolvedResult[1];
+        console.log('RESOLVED TO: ', pathname, '\n');
+
+        if (pathname.indexOf('..') >= 0 && !routed) {
             res.writeHead(403);
             res.end('The resource you required is not accessible.');
         }
@@ -146,13 +161,13 @@ var runServer = function(config){
     server.on('error', function(e){
         switch (e.code) {
             case 'EADDRINUSE':
-                console.log('Exception: EADDRINUSE. Try another port?');
+                console.error('Exception: EADDRINUSE. Try another port?');
                 break;
             case 'EADDRNOTAVAIL':
-                console.log('Exception: EADDRNOTAVAIL. Try another hostname?');
+                console.error('Exception: EADDRNOTAVAIL. Try another hostname?');
                 break;
             default:
-                console.log('Exception: ' + e.code);
+                console.error('Exception: ' + e.code);
         }
         process.exit();
     });
@@ -173,7 +188,7 @@ if (require.main === module) { // for unit test
             config.port = customConfig.port;
         }
         else {
-            console.log('Port value is illegal. Trying using default.');
+            console.warn('Port value is illegal. Trying using default.');
         }
     }
     if (customConfig.host) {
