@@ -1,8 +1,11 @@
 {
   "name": "ssss",
   "version": "0.1.0",
-  "description": "SSSS Simple Static Server",
-  "main": "sss.js",
+  "description": "Super Simple Static Server",
+  "repository": {
+    "url": "https://github.com/lukeupup/ssss/"
+  },
+  "main": "./bin/ssss",
   "keywords": [
     "Static",
     "file",
